@@ -26,8 +26,10 @@ import (
 )
 
 // Marshal returns the JSON encoding of v.
+// Marshal 返回v的JSON编码
 //
 // Marshal traverses the value v recursively.
+// Marshal 递归遍历v
 // If an encountered value implements the Marshaler interface
 // and is not a nil pointer, Marshal calls its MarshalJSON method
 // to produce JSON. If no MarshalJSON method is present but the
@@ -36,12 +38,19 @@ import (
 // The nil pointer exception is not strictly necessary
 // but mimics a similar, necessary exception in the behavior of
 // UnmarshalJSON.
+// 如果遇到的值实现了 Marshaler 接口并且不是一个nil指针, Marshal 会调用它的 MarshalJSON 方法
+// 来生成JSON. 如果当前没有 MarshalJSON 方法但它实现了 encoding.TextMarshaler 代替，Marshal
+// 调用它的 MarshalText 方法并且将结果编码为 JSON 字符串.
+// nil 指针异常不是绝对必要的，但在 UnmarshalJSON 的行为中模仿了类似的必要异常。
 //
 // Otherwise, Marshal uses the following type-dependent default encodings:
+// 否则, Marshal 使用依赖类型的默认编码
 //
 // Boolean values encode as JSON booleans.
+// Boolean 值编码为 JSON 中的 booleans
 //
 // Floating point, integer, and Number values encode as JSON numbers.
+// Floating 指针, integer和 Number 值 编码为 JSON numbers.
 //
 // String values encode as JSON strings coerced to valid UTF-8,
 // replacing invalid bytes with the Unicode replacement rune.
@@ -51,29 +60,40 @@ import (
 // to "\u003c","\u003e", "\u0026", "\u2028", and "\u2029".
 // This replacement can be disabled when using an Encoder,
 // by calling SetEscapeHTML(false).
+// String编码为JSON strings, 强制转换为有效的UTF-8, 用Unicode替换符文替换无效字节
+// 为了让 JSON 可以安全地嵌入 HTML <script> 标签中, 字符串使用 HTMLEscape 进行编码,
+// 它替换了 "<"、">"、"&"、U+2028 和 U+2029 转义为 "\ u003c”、“\u003e”、“\u0026”、“\u2028”和“\u2029”.
+// 使用编码器时，可以通过调用 SetEscapeHTML(false) 禁用此替换.
 //
 // Array and slice values encode as JSON arrays, except that
 // []byte encodes as a base64-encoded string, and a nil slice
 // encodes as the null JSON value.
+// Array 和 slice 编码为 JSON arrays.(例外 ,[]byte 会编码为 base64 编码的字符串, nil slice 会编码为 JSON 的 null 值)
 //
 // Struct values encode as JSON objects.
 // Each exported struct field becomes a member of the object, using the
 // field name as the object key, unless the field is omitted for one of the
 // reasons given below.
+// Struct 编码为 JSON 对象. 每个导出(即大写字母开头)的 struct 字段都成为对象的成员, 使用字段名称作为对象键, 除非由于以下原因之一省略了该字段.
 //
 // The encoding of each struct field can be customized by the format string
 // stored under the "json" key in the struct field's tag.
 // The format string gives the name of the field, possibly followed by a
 // comma-separated list of options. The name may be empty in order to
 // specify options without overriding the default field name.
+// 每个 struct 字段的编码可以通过存储在 struct 字段标签中 “json” 键下的格式字符串进行自定义,
+// 格式字符串给出了字段的名称, 可能后跟以逗号分隔的选项列表. 名称可以为空, 以便在不覆盖默认字段名称的情况下指定选项.
 //
 // The "omitempty" option specifies that the field should be omitted
 // from the encoding if the field has an empty value, defined as
 // false, 0, a nil pointer, a nil interface value, and any empty array,
 // slice, map, or string.
+// “omitempty”选项指定如果字段具有空值(定义为 false、0、nil 指针、nil 接口值以及任何空数组、切片、映射或字符串), 则应从编码中省略该字段.
 //
 // As a special case, if the field tag is "-", the field is always omitted.
 // Note that a field with name "-" can still be generated using the tag "-,".
+// 作为一种特殊情况, 如果字段标记为“-”, 则始终省略该字段.
+// 请注意, 使用标记“-”仍然可以生成名称为“-”的字段.
 //
 // Examples of struct field tags and their meanings:
 //
