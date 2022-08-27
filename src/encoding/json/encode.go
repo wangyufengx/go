@@ -96,6 +96,7 @@ import (
 // 请注意, 使用标记“-”仍然可以生成名称为“-”的字段.
 //
 // Examples of struct field tags and their meanings:
+// struct 字段标签及其含义示例:
 //
 //	// Field appears in JSON as key "myName".
 //	Field int `json:"myName"`
@@ -120,12 +121,15 @@ import (
 // JSON-encoded string. It applies only to fields of string, floating point,
 // integer, or boolean types. This extra level of encoding is sometimes used
 // when communicating with JavaScript programs:
+// “字符串”选项表示字段在 JSON 编码的字符串中存储为 JSON, 它仅适用于字符串、浮点、整数或布尔类型的字段:
+// 在与 JavaScript 程序通信时, 有时会使用这种额外的编码级别:
 //
 //	Int64String int64 `json:",string"`
 //
 // The key name will be used if it's a non-empty string consisting of
 // only Unicode letters, digits, and ASCII punctuation except quotation
 // marks, backslash, and comma.
+// 如果key是一个非空字符串, 除了引号、反斜杠和逗号, 它只包含 Unicode 字母、数字和 ASCII 标点符号.
 //
 // Anonymous struct fields are usually marshaled as if their inner exported fields
 // were fields in the outer struct, subject to the usual Go visibility rules amended
@@ -134,24 +138,34 @@ import (
 // having that name, rather than being anonymous.
 // An anonymous struct field of interface type is treated the same as having
 // that type as its name, rather than being anonymous.
+// 匿名结构字段通常被编组，就好像它们的内部导出字段是外部结构中的字段一样，受制于下一段所述修改的通常的 Go 可见性规则。
+// 在其 JSON 标记中给出名称的匿名结构字段被视为具有该名称，而不是匿名的。
+// 接口类型的匿名结构字段被视为以该类型作为其名称，而不是匿名。
 //
 // The Go visibility rules for struct fields are amended for JSON when
 // deciding which field to marshal or unmarshal. If there are
 // multiple fields at the same level, and that level is the least
 // nested (and would therefore be the nesting level selected by the
 // usual Go rules), the following extra rules apply:
+// 在决定编组或解组哪个字段时, 针对 JSON 修改了结构字段的 Go 可见性规则.
+// 如果同一级别有多个字段, 并且该级别嵌套最少（因此将是通常的 Go 规则选择的嵌套级别）, 则适用以下额外规则:
 //
 // 1) Of those fields, if any are JSON-tagged, only tagged fields are considered,
 // even if there are multiple untagged fields that would otherwise conflict.
+// 1) 在这些字段中，如果有任何带有 JSON 标记的字段，则仅考虑带标记的字段，即使有多个未标记的字段会发生冲突。
 //
 // 2) If there is exactly one field (tagged or not according to the first rule), that is selected.
+// 2) 如果恰好有一个字段（根据第一条规则标记或未标记），则选择该字段。
 //
 // 3) Otherwise there are multiple fields, and all are ignored; no error occurs.
+// 3) 否则有多个字段，全部忽略； 没有错误发生。
 //
 // Handling of anonymous struct fields is new in Go 1.1.
 // Prior to Go 1.1, anonymous struct fields were ignored. To force ignoring of
 // an anonymous struct field in both current and earlier versions, give the field
 // a JSON tag of "-".
+// 匿名结构字段的处理是 Go 1.1 中的新功能.
+// 在 Go 1.1 之前, 匿名结构字段被忽略. 要在当前版本和早期版本中强制忽略匿名结构字段, 请为该字段指定一个 JSON 标记“-”.
 //
 // Map values encode as JSON objects. The map's key type must either be a
 // string, an integer type, or implement encoding.TextMarshaler. The map keys
@@ -161,19 +175,32 @@ import (
 //   - encoding.TextMarshalers are marshaled
 //   - integer keys are converted to strings
 //
+// Map 编码为 JSON 对象. 映射的键类型必须是字符串、整数类型或实现 encoding.TextMarshaler.
+// 通过应用以下规则对映射键进行排序并用作 JSON 对象键, 但要遵守上面为字符串值描述的 UTF-8 强制:
+//   - 直接使用任何字符串类型的key
+//   - encoding.TextMarshalers marshaled
+//   - 整数key被转换为字符串
+//
 // Pointer values encode as the value pointed to.
 // A nil pointer encodes as the null JSON value.
+// 指针值编码为指向的值。
+// 一个 nil 指针编码为空 JSON 值。
 //
 // Interface values encode as the value contained in the interface.
 // A nil interface value encodes as the null JSON value.
+// Interface 编码为 interface中包含的值.
+// 一个 nil interface 值编码为空 JSON 值.
 //
 // Channel, complex, and function values cannot be encoded in JSON.
 // Attempting to encode such a value causes Marshal to return
 // an UnsupportedTypeError.
+// Channel, complex, function 不能编译到JSON.
+// 尝试对此类值进行编码会导致 Marshal 返回 UnsupportedTypeError.
 //
 // JSON cannot represent cyclic data structures and Marshal does not
 // handle them. Passing cyclic structures to Marshal will result in
 // an error.
+// JSON 不能表示循环数据结构, Marshal 不处理它们. 将循环结构传递给 Marshal 将导致错误。
 func Marshal(v any) ([]byte, error) {
 	e := newEncodeState()
 
